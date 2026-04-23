@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ОГЭ Русский | Соловейное логово</title>
+    <title>ОГЭ Русский | OGERUS</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
             background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 40%, #fef3c7 100%);
             min-height: 100vh;
             display: flex;
@@ -80,7 +80,7 @@
             border-radius: 100px;
             font-weight: 600;
             font-size: 14px;
-            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transition: all 0.25s;
             text-decoration: none;
             display: inline-block;
             text-align: center;
@@ -145,7 +145,6 @@
             -webkit-background-clip: text;
             color: transparent;
             margin-bottom: 18px;
-            text-shadow: 0 2px 10px rgba(162, 28, 175, 0.1);
         }
 
         .subtitle {
@@ -176,50 +175,88 @@
             text-decoration: none;
             font-size: 20px;
             font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            transition: all 0.3s;
             min-width: 230px;
             border: 1.5px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-            letter-spacing: -0.3px;
         }
 
         .tasks-btn {
             color: #be185d;
             border-bottom: 4px solid #f43f5e;
-            box-shadow: 0 12px 28px -8px rgba(244, 63, 94, 0.2);
         }
 
         .tasks-btn:hover {
             transform: translateY(-6px) scale(1.02);
             background: #fff0f3;
-            border-bottom-color: #e11d48;
-            box-shadow: 0 24px 36px -12px rgba(244, 63, 94, 0.35);
         }
 
         .theory-btn {
             color: #b45309;
             border-bottom: 4px solid #fbbf24;
-            box-shadow: 0 12px 28px -8px rgba(251, 191, 36, 0.2);
         }
 
         .theory-btn:hover {
             transform: translateY(-6px) scale(1.02);
             background: #fffbeb;
-            border-bottom-color: #f59e0b;
-            box-shadow: 0 24px 36px -12px rgba(251, 191, 36, 0.4);
         }
 
         .profile-btn {
             color: #7e22ce;
             border-bottom: 4px solid #c084fc;
-            box-shadow: 0 12px 28px -8px rgba(168, 85, 247, 0.2);
         }
 
         .profile-btn:hover {
             transform: translateY(-6px) scale(1.02);
             background: #faf5ff;
-            border-bottom-color: #a855f7;
-            box-shadow: 0 24px 36px -12px rgba(168, 85, 247, 0.4);
+        }
+
+        .advantages-container {
+            max-width: 800px;
+            margin: 50px auto 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .advantage-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 28px 22px;
+            border-radius: 48px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 260px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        .advantage-icon {
+            font-size: 32px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .advantage-title {
+            font-weight: 700;
+            color: #4c1d95;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .advantage-text {
+            color: #6b21a5;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         .info-block {
@@ -231,7 +268,6 @@
             border: 1px solid rgba(249, 168, 212, 0.5);
             max-width: 740px;
             width: 100%;
-            transition: all 0.2s;
         }
 
         .info-text {
@@ -297,13 +333,29 @@
     <div class="main-content">
         <h1 class="welcome-title">Подготовка к ОГЭ</h1>
         <div class="subtitle">
-             Тесты • Теория • Сочинения
+            Тесты • Теория • Сочинения
         </div>
 
         <div class="action-grid">
             <a href="/tasks" class="card-btn tasks-btn">Каталог заданий</a>
             <a href="/theory" class="card-btn theory-btn">Теория и правила</a>
             <a href="/profile" class="card-btn profile-btn">Моя статистика</a>
+        </div>
+
+        <!-- Новый блок с плюсами -->
+        <div class="advantages-container">
+            <div class="advantage-card">
+                <div class="advantage-title">Актуальные задания</div>
+                <div class="advantage-text">Все упражнения соответствуют формату ОГЭ и новым изменениям от ФИПИ</div>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-title">Отслеживание прогресса</div>
+                <div class="advantage-text">Профиль с чек-листом тем и статистикой пройденных заданий</div>
+            </div>
+            <div class="advantage-card">
+                <div class="advantage-title">Одобрено экспертом</div>
+                <div class="advantage-text">Материалы проверены настоящим экспертом ОГЭ по русскому языку</div>
+            </div>
         </div>
 
         <div class="info-block">
@@ -317,7 +369,7 @@
     </div>
 
     <div class="footer">
-        © 2026 Подготовка ОГЭ Русский язык. Одобрено настоящим экспертом ОГЭ. По всем вопросам обрщаться по почте Solovey@Russkiy.ru
+        2026 Подготовка ОГЭ Русский язык. Одобрено экспертом ОГЭ.
     </div>
 
 </body>
