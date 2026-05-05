@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ОГЭ Русский | OGERUS</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
@@ -57,6 +53,8 @@
             position: relative;
             z-index: 10;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.02);
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .logo {
@@ -69,11 +67,9 @@
             color: transparent;
             text-shadow: 0 2px 5px rgba(168, 85, 247, 0.1);
         }
+        .logo a { text-decoration: none; color: inherit; }
 
-        .auth-buttons {
-            display: flex;
-            gap: 12px;
-        }
+        .auth-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
 
         .btn {
             padding: 8px 24px;
@@ -92,12 +88,7 @@
             color: #7e22ce;
             border: 1.5px solid #d8b4fe;
         }
-
-        .btn-login:hover {
-            background: #f3e8ff;
-            border-color: #c084fc;
-            transform: scale(1.02);
-        }
+        .btn-login:hover { background: #f3e8ff; border-color: #c084fc; transform: scale(1.02); }
 
         .btn-register {
             background: linear-gradient(105deg, #f59e0b, #ec4899);
@@ -105,11 +96,7 @@
             border: none;
             box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25);
         }
-
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.4);
-        }
+        .btn-register:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.4); }
 
         .btn-profile {
             background: rgba(255, 255, 255, 0.5);
@@ -117,12 +104,23 @@
             border: 1px solid #f0abfc;
             color: #6b21a5;
         }
+        .btn-profile:hover { background: white; border-color: #d946ef; transform: translateY(-2px); }
 
-        .btn-profile:hover {
-            background: white;
-            border-color: #d946ef;
-            transform: translateY(-2px);
+        .btn-criteria {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid #fbbf24;
+            color: #b45309;
         }
+        .btn-criteria:hover { background: white; border-color: #f59e0b; transform: translateY(-2px); }
+
+        .btn-cheatsheet {
+            background: linear-gradient(105deg, #a855f7, #ec4899);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+        }
+        .btn-cheatsheet:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.4); }
 
         .main-content {
             flex: 1;
@@ -181,83 +179,14 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
         }
 
-        .tasks-btn {
-            color: #be185d;
-            border-bottom: 4px solid #f43f5e;
-        }
+        .tasks-btn { color: #be185d; border-bottom: 4px solid #f43f5e; }
+        .tasks-btn:hover { transform: translateY(-6px) scale(1.02); background: #fff0f3; }
 
-        .tasks-btn:hover {
-            transform: translateY(-6px) scale(1.02);
-            background: #fff0f3;
-        }
+        .theory-btn { color: #b45309; border-bottom: 4px solid #fbbf24; }
+        .theory-btn:hover { transform: translateY(-6px) scale(1.02); background: #fffbeb; }
 
-        .theory-btn {
-            color: #b45309;
-            border-bottom: 4px solid #fbbf24;
-        }
-
-        .theory-btn:hover {
-            transform: translateY(-6px) scale(1.02);
-            background: #fffbeb;
-        }
-
-        .profile-btn {
-            color: #7e22ce;
-            border-bottom: 4px solid #c084fc;
-        }
-
-        .profile-btn:hover {
-            transform: translateY(-6px) scale(1.02);
-            background: #faf5ff;
-        }
-
-        .advantages-container {
-            max-width: 800px;
-            margin: 50px auto 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .advantage-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            padding: 28px 22px;
-            border-radius: 48px;
-            flex: 1;
-            min-width: 200px;
-            max-width: 260px;
-            border: 1.5px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .advantage-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
-        }
-
-        .advantage-icon {
-            font-size: 32px;
-            margin-bottom: 14px;
-            display: block;
-        }
-
-        .advantage-title {
-            font-weight: 700;
-            color: #4c1d95;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .advantage-text {
-            color: #6b21a5;
-            font-size: 13px;
-            line-height: 1.5;
-        }
+        .profile-btn { color: #7e22ce; border-bottom: 4px solid #c084fc; }
+        .profile-btn:hover { transform: translateY(-6px) scale(1.02); background: #faf5ff; }
 
         .info-block {
             margin-top: 80px;
@@ -283,11 +212,7 @@
             font-weight: 700;
             border-bottom: 2px dotted #f9a8d4;
         }
-
-        .info-link:hover {
-            color: #be185d;
-            border-bottom-color: #ec4899;
-        }
+        .info-link:hover { color: #be185d; border-bottom-color: #ec4899; }
 
         .footer {
             text-align: center;
@@ -303,30 +228,23 @@
         }
 
         @media (max-width: 700px) {
-            .welcome-title {
-                font-size: 42px;
-            }
-            .card-btn {
-                padding: 18px 32px;
-                font-size: 18px;
-                min-width: 180px;
-            }
-            .header {
-                padding: 12px 20px;
-                flex-direction: column;
-                gap: 12px;
-            }
+            .welcome-title { font-size: 42px; }
+            .card-btn { padding: 18px 32px; font-size: 18px; min-width: 180px; }
+            .header { flex-direction: column; }
+            .auth-buttons { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">OGERUS</div>
+        <div class="logo"><a href="/">OGERUS</a></div>
         <div class="auth-buttons">
             <a href="/login" class="btn btn-login">Вход</a>
             <a href="/register" class="btn btn-register">Регистрация</a>
             <a href="/profile" class="btn btn-profile">Профиль</a>
+            <a href="/criteria" class="btn btn-criteria">Критерии</a>
+            <a href="/cheatsheet" class="btn btn-cheatsheet">📚 Шпаргалка</a>
         </div>
     </div>
 
@@ -342,28 +260,14 @@
             <a href="/profile" class="card-btn profile-btn">Моя статистика</a>
         </div>
 
-        <!-- Новый блок с плюсами -->
-        <div class="advantages-container">
-            <div class="advantage-card">
-                <div class="advantage-title">Актуальные задания</div>
-                <div class="advantage-text">Все упражнения соответствуют формату ОГЭ и новым изменениям от ФИПИ</div>
-            </div>
-            <div class="advantage-card">
-                <div class="advantage-title">Отслеживание прогресса</div>
-                <div class="advantage-text">Профиль с чек-листом тем и статистикой пройденных заданий</div>
-            </div>
-            <div class="advantage-card">
-                <div class="advantage-title">Одобрено экспертом</div>
-                <div class="advantage-text">Материалы проверены настоящим экспертом ОГЭ по русскому языку</div>
-            </div>
-        </div>
-
         <div class="info-block">
             <p class="info-text">
                 <strong>Не бойся экзаменов!</strong> Мы подготовим тебя на максимальный балл
             </p>
             <p class="info-text" style="margin-top: 12px;">
                 Выполняй задания и отслеживай прогресс в <a href="/profile" class="info-link">профиле</a>.
+                Ознакомься с <a href="/criteria" class="info-link">критериями оценивания</a> ОГЭ 2026.
+                Все правила в <a href="/cheatsheet" class="info-link">шпаргалке</a>.
             </p>
         </div>
     </div>

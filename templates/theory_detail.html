@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Теория: {{ topic }} | ОГЭRUS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 40%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #a855f7, #ec4899, #fbbf24); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .logo a { text-decoration: none; color: inherit; }
+        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .nav-link { color: #7e22ce; text-decoration: none; font-weight: 600; }
+        .nav-link:hover { color: #ec4899; }
+
+        .main-content {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .theory-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 48px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #4c1d95;
+            margin-bottom: 24px;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #1e1b4b;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 12px 32px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #d8b4fe;
+            border-radius: 40px;
+            color: #7e22ce;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .btn-back:hover { background: white; }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #6b21a5;
+            background: rgba(255, 245, 250, 0.5);
+            border-top: 1px solid rgba(216, 180, 254, 0.5);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><a href="/">OGERUS</a></div>
+        <div class="nav-links">
+            <a href="/profile" class="nav-link">Профиль</a>
+            <a href="/tasks" class="nav-link">Задания</a>
+            <a href="/theory" class="nav-link">Теория</a>
+            <a href="/logout" class="nav-link">Выйти</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="theory-card">
+            <h1>📖 {{ topic|replace('_', ' ')|title }}</h1>
+            <div class="content">{{ content }}</div>
+            <a href="/theory" class="btn-back">← Назад к теории</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        2026 Подготовка ОГЭ Русский язык
+    </div>
+</body>
+</html>

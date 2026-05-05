@@ -73,11 +73,15 @@
             color: inherit;
         }
 
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
         .nav-link {
             color: #7e22ce;
             text-decoration: none;
             font-weight: 600;
-            font-size: 15px;
         }
 
         .nav-link:hover {
@@ -248,7 +252,7 @@
                 {% endfor %}
             {% endwith %}
 
-            <form method="POST">
+            <form method="POST" action="/login">
                 <div class="form-group">
                     <label class="form-label" for="login">Имя пользователя или Email</label>
                     <input type="text" id="login" name="login" class="form-input" placeholder="solovey@example.com" required>

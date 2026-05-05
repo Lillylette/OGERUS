@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шпаргалка | ОГЭRUS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 40%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899, #fbbf24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .logo a { text-decoration: none; color: inherit; }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .nav-link { color: #7e22ce; text-decoration: none; font-weight: 600; }
+        .nav-link:hover { color: #ec4899; }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        h1 {
+            font-size: 42px;
+            background: linear-gradient(145deg, #a21caf, #fbbf24, #f43f5e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b21a5;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .topic-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .topic-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid #d8b4fe;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7e22ce;
+            transition: all 0.2s;
+        }
+        .topic-btn:hover { background: white; transform: translateY(-2px); }
+        .topic-btn.active {
+            background: linear-gradient(105deg, #f59e0b, #ec4899);
+            color: white;
+            border: none;
+        }
+
+        .topic-content { display: none; }
+        .topic-content.active { display: block; }
+
+        .cheatsheet-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 48px;
+            padding: 32px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+
+        .cheatsheet-card h2 {
+            color: #4c1d95;
+            margin-bottom: 20px;
+            font-size: 28px;
+            border-left: 5px solid #ec4899;
+            padding-left: 20px;
+        }
+
+        .cheatsheet-card h3 {
+            color: #7e22ce;
+            margin: 20px 0 12px 0;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(216, 180, 254, 0.5);
+            vertical-align: top;
+        }
+        th { background: rgba(168, 85, 247, 0.1); color: #4c1d95; }
+
+        .rule-box {
+            background: rgba(168, 85, 247, 0.08);
+            padding: 15px;
+            border-radius: 20px;
+            margin: 15px 0;
+        }
+        .highlight { background: #fef3c7; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+        .example { color: #be185d; font-style: italic; }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #6b21a5;
+            background: rgba(255, 245, 250, 0.5);
+            border-top: 1px solid rgba(216, 180, 254, 0.5);
+        }
+
+        @media (max-width: 700px) {
+            .cheatsheet-card { padding: 24px; }
+            th, td { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><a href="/">OGERUS</a></div>
+        <div class="nav-links">
+            <a href="/profile" class="nav-link">Профиль</a>
+            <a href="/criteria" class="nav-link">Критерии ОГЭ</a>
+            <a href="/logout" class="nav-link">Выйти</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>📖 Шпаргалка для подготовки к ОГЭ</h1>
+        <div class="subtitle">Все правила в одном месте</div>
+
+        <div class="topic-buttons">
+            <button class="topic-btn active" data-topic="task6">Задание 6</button>
+            <button class="topic-btn" data-topic="task8">Задание 8</button>
+            <button class="topic-btn" data-topic="task9">Задание 9</button>
+            <button class="topic-btn" data-topic="bsp">БСП</button>
+            <button class="topic-btn" data-topic="punctuation">Пунктуация</button>
+            <button class="topic-btn" data-topic="express">Средства выразительности</button>
+        </div>
+
+        <div id="task6" class="topic-content active">
+            <div class="cheatsheet-card">
+                <h2>📝 Задание 6: Орфограммы</h2>
+                <div class="rule-box">
+                    <strong>Приставки на -З/-С:</strong> перед звонкой → З, перед глухой → С<br>
+                    <strong>ПРЕ-/ПРИ-:</strong> ПРЕ = "очень" или "пере-", ПРИ = приближение/присоединение/близость/неполнота<br>
+                    <strong>И/Ы после приставок:</strong> после русской приставки на согласную → Ы<br>
+                    <strong>Корни с чередованием:</strong> зависит от ударения/суффикса А/последующих согласных/значения
+                </div>
+                <div class="rule-box">
+                    <strong>Н/НН:</strong>
+                    В причастиях: есть приставка, -ова-/-ева-, зависимые слова, глагол сов.вида → НН<br>
+                    В отглагольных прилагательных: Н (кроме исключений)
+                </div>
+            </div>
+        </div>
+
+        <div id="task8" class="topic-content">
+            <div class="cheatsheet-card">
+                <h2>📝 Задание 8: Грамматические нормы</h2>
+                <div class="rule-box">
+                    <strong>Р.п. мн.ч.:</strong><br>
+                    ОВ/ЕВ: абрикосов, бананов, помидоров, носков<br>
+                    Нулевое: яблок, груш, слив, макарон, чулок<br>
+                    -ИЙ/-ЕВ: сидений, побережий, платьев
+                </div>
+                <div class="rule-box">
+                    <strong>Глаголы:</strong><br>
+                    езжай / поезжай(те)  |  ляг / лягте  |  клади / кладите<br>
+                    промок (он)  |  засох (он)  |  исчез (он)
+                </div>
+                <div class="rule-box">
+                    <strong>Числительные:</strong><br>
+                    Тв.п.: сорока, девяноста, ста, пятьюдесятью, шестьюдесятью<br>
+                    оба (м.р.) — обе (ж.р.)
+                </div>
+            </div>
+        </div>
+
+        <div id="task9" class="topic-content">
+            <div class="cheatsheet-card">
+                <h2>📝 Задание 9: Замена словосочетаний</h2>
+                <div class="rule-box">
+                    <strong>Запоминай: СУП</strong><br>
+                    Согласование → Управление: плавательный бассейн → бассейн для плавания<br>
+                    Управление → Примыкание: слушать с вниманием → слушать внимательно<br>
+                    Примыкание → Управление: внимательно слушать → слушать с вниманием<br>
+                    Согласование → Примыкание: утренняя прогулка → прогулка утром
+                </div>
+            </div>
+        </div>
+
+        <div id="bsp" class="topic-content">
+            <div class="cheatsheet-card">
+                <h2>📝 БСП: двоеточие и тире</h2>
+                <div class="rule-box">
+                    <strong>Двоеточие (АЧП):</strong><br>
+                    А именно (пояснение): [В доме тишина]: скрипнула дверь<br>
+                    Что (дополнение): [Все знают]: бережёного Бог бережёт<br>
+                    Потому что (причина): [Страшно]: материя обращалась в пыль
+                </div>
+                <div class="rule-box">
+                    <strong>Тире (КЕПКА):</strong><br>
+                    Когда: [Настанет утро] — [двинемся в путь]<br>
+                    Если: [Назвался груздем] — [полезай в кузов]<br>
+                    Поэтому: [Солнце встаёт] — [будет жаркий день]<br>
+                    Как: [Молвит слово] — [соловей поёт]<br>
+                    А, НО: [Службу оставил] — [быстро поменял решение]
+                </div>
+            </div>
+        </div>
+
+        <div id="punctuation" class="topic-content">
+            <div class="cheatsheet-card">
+                <h2>📝 Пунктуация</h2>
+                <div class="rule-box">
+                    <strong>Тире между подлежащим и сказуемым:</strong><br>
+                    ✅ Ставится: Сущ. — Сущ.; н.ф.гл. — н.ф.гл.; числ. — числ.<br>
+                    ❌ НЕ ставится: есть, как, будто, словно, не
+                </div>
+                <div class="rule-box">
+                    <strong>Обособление:</strong><br>
+                    Причастный оборот после слова → запятые<br>
+                    Относится к личному местоимению → запятые<br>
+                    Деепричастный оборот → запятые<br>
+                    Сравнительный оборот (как, словно, будто) → запятые
+                </div>
+            </div>
+        </div>
+
+        <div id="express" class="topic-content">
+            <div class="cheatsheet-card">
+                <h2>📝 Средства выразительности</h2>
+                <div class="rule-box">
+                    <strong>Эпитет:</strong> образное определение — "золотая осень"<br>
+                    <strong>Метафора:</strong> скрытое сравнение — "горит восток зарёю новой"<br>
+                    <strong>Олицетворение:</strong> неживое как живое — "ветер завывал"<br>
+                    <strong>Сравнение:</strong> с союзами как, словно, будто — "лёд, как сахар"<br>
+                    <strong>Фразеологизм:</strong> устойчивое выражение — "повесить нос"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        2026 Подготовка ОГЭ Русский язык
+    </div>
+
+    <script>
+        document.querySelectorAll('.topic-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.topic-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.topic).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -77,7 +77,6 @@
             color: #7e22ce;
             text-decoration: none;
             font-weight: 600;
-            font-size: 15px;
         }
 
         .main-content {
@@ -244,7 +243,7 @@
                 {% endfor %}
             {% endwith %}
 
-            <form method="POST">
+            <form method="POST" action="/register">
                 <div class="form-group">
                     <label class="form-label" for="username">Имя пользователя</label>
                     <input type="text" id="username" name="username" class="form-input" placeholder="solovey_rus" required>
