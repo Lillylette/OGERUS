@@ -1,76 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.utils import secure_filename
+from models import db, User, UserProgress, ChecklistItem, UserAchievement
 from datetime import datetime
 import os
 import json
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-this'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'ogers.db'
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
-db = SQLAlchemy(app)
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-
-# === МОДЕЛИ ===
-
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    progress = db.relationship('UserProgress', backref='user', uselist=False)
-    completed_tasks = db.relationship('UserTask', backref='user', lazy=True)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-
-class UserProgress(db.Model):
-    __tablename__ = 'user_progress'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    theme1_completed = db.Column(db.Boolean, default=False)  # Синтаксис
-    theme2_completed = db.Column(db.Boolean, default=False)  # Пунктуация
-    theme3_completed = db.Column(db.Boolean, default=False)  # Орфография
-    theme4_completed = db.Column(db.Boolean, default=False)  # Лексика
-
-
-class Task(db.Model):
-    __tablename__ = 'tasks'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-    question = db.Column(db.Text, nullable=False)
-    options = db.Column(db.Text)
-    correct_answer = db.Column(db.String(10), nullable=False)
-    explanation = db.Column(db.Text)
-    category = db.Column(db.String(100))
-    difficulty = db.Column(db.String(20), default="Средний")
-    points = db.Column(db.Integer, default=1)
-
-
-class UserTask(db.Model):
-    __tablename__ = 'user_tasks'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
-    completed = db.Column(db.Boolean, default=False)
-    user_answer = db.Column(db.String(10))
-    is_correct = db.Column(db.Boolean, default=False)
-    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 @login_manager.user_loader
@@ -78,152 +27,37 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-# === СОЗДАНИЕ ТАБЛИЦ И ТЕСТОВЫХ ЗАДАНИЙ ===
-with app.app_context():
-    db.create_all()
-    if Task.query.count() == 0:
-        sample_tasks = [
-            # Орфография
-            Task(title="Н/НН в прилагательных",
-                 description="Выберите правильный вариант написания",
-                 question="В каком слове на месте пропуска пишется НН?",
-                 options=json.dumps(["А) кожа...ый", "Б) ветре...ый", "В) карма...ый", "Г) гуси...ый"]),
-                 correct_answer="В",
-                 explanation="В суффиксах -ЕНН-, -ОНН- пишется НН. Карманный – от карман + н.",
-                 category="Орфография",
-                 difficulty="Высокий"),
-            Task(title="Н/НН в причастиях",
-                 description="Выберите правильный вариант написания",
-                 question="В каком слове пишется Н?",
-                 options=json.dumps(["А) жарен...ая картошка", "Б) решён...ая задача", "В) крашен...ый забор", "Г) куплен...ый билет"]),
-                 correct_answer="В",
-                 explanation="Отглагольное прилагательное без зависимых слов – крашеный (одна Н).",
-                 category="Орфография",
-                 difficulty="Средний"),
-            Task(title="Корни с чередованием",
-                 description="Выберите правильную букву",
-                 question="В каком слове пишется буква А?",
-                 options=json.dumps(["А) заг...реть", "Б) прик...снуться", "В) р...сток", "Г) выр...щенный"]),
-                 correct_answer="Г",
-                 explanation="В корне -раст-/-ращ- пишется А перед СТ и Щ.",
-                 category="Орфография",
-                 difficulty="Средний"),
-            Task(title="Правописание приставок ПРЕ-/ПРИ-",
-                 description="Выберите правильный вариант",
-                 question="В каком слове пишется приставка ПРЕ-?",
-                 options=json.dumps(["А) пр...морский", "Б) пр...одолеть", "В) пр...клеить", "Г) пр...встать"]),
-                 correct_answer="Б",
-                 explanation="ПРЕ- в значении 'очень' или 'пере-': преодолеть = переодолеть.",
-                 category="Орфография",
-                 difficulty="Средний"),
-            Task(title="Правописание суффиксов -К- и -СК-",
-                 description="Выберите правильный вариант",
-                 question="В каком слове пишется суффикс -СК-?",
-                 options=json.dumps(["А) матрос...ий", "Б) немец...ий", "В) турист...ий", "Г) казац...ий"]),
-                 correct_answer="В",
-                 explanation="Суффикс -СК- пишется в относительных прилагательных (туристский).",
-                 category="Орфография",
-                 difficulty="Низкий"),
-            # Пунктуация
-            Task(title="Пунктуация при вводных словах",
-                 description="Расставьте знаки препинания",
-                 question="В каком варианте ответа правильно указаны все цифры, на месте которых должны стоять запятые?",
-                 options=json.dumps(["А) Конечно(1) вы(2) правы.", "Б) Конечно(1) вы(2) правы."]),
-                 correct_answer="А",
-                 explanation="Вводное слово 'конечно' выделяется запятой (цифра 1).",
-                 category="Пунктуация",
-                 difficulty="Средний"),
-            Task(title="Знаки препинания при однородных членах",
-                 description="Расставьте запятые",
-                 question="В каком предложении нужно поставить одну запятую?",
-                 options=json.dumps(["А) И днём и ночью кот учёный всё ходит по цепи кругом.", "Б) Он был ни жив ни мёртв.", "В) В саду росли и яблони и груши и сливы.", "Г) Мал золотник да дорог."]),
-                 correct_answer="Г",
-                 explanation="Противопоставление с союзом 'да' (=но) – ставится запятая.",
-                 category="Пунктуация",
-                 difficulty="Средний"),
-            Task(title="Пунктуация в сложносочинённом предложении",
-                 description="Укажите правильную расстановку запятых",
-                 question="На месте каких цифр должны стоять запятые? 'Солнце уже спряталось(1) и ночные тени надвигались(2) но мы(3) всё ещё сидели на берегу(4) и смотрели на воду.'",
-                 options=json.dumps(["А) 1,2,3,4", "Б) 1,2", "В) 2,3", "Г) 1,2,4"]),
-                 correct_answer="Б",
-                 explanation="Запятая между частями ССП перед 'и' (1), и перед 'но' (2).",
-                 category="Пунктуация",
-                 difficulty="Высокий"),
-            Task(title="Пунктуация при причастном обороте",
-                 description="Найдите предложение с обособленным определением",
-                 question="В каком предложении причастный оборот выделяется запятыми?",
-                 options=json.dumps(["А) Дорога освещённая луной казалась таинственной.", "Б) Освещённая луной дорога казалась таинственной.", "В) Дорога освещённая луной казалась таинственной.", "Г) Дорога, освещённая луной, казалась таинственной."]),
-                 correct_answer="Г",
-                 explanation="Причастный оборот, стоящий после определяемого слова, обособляется.",
-                 category="Пунктуация",
-                 difficulty="Средний"),
-            # Синтаксис
-            Task(title="Виды подчинительной связи",
-                 description="Определите тип связи в словосочетании",
-                 question="Какое словосочетание построено по типу 'примыкание'?",
-                 options=json.dumps(["А) читать книгу", "Б) очень интересный", "В) дом из дерева", "Г) мой друг"]),
-                 correct_answer="Б",
-                 explanation="Примыкание – связь по смыслу с неизменяемым словом (наречием).",
-                 category="Синтаксис",
-                 difficulty="Средний"),
-            Task(title="Грамматическая основа предложения",
-                 description="Найдите грамматическую основу",
-                 question="Какая пара слов является грамматической основой в предложении: 'Всё в доме было готово к приезду гостей.'?",
-                 options=json.dumps(["А) всё было", "Б) всё было готово", "В) было готово", "Г) всё готово"]),
-                 correct_answer="Б",
-                 explanation="Подлежащее 'всё', составное именное сказуемое 'было готово'.",
-                 category="Синтаксис",
-                 difficulty="Низкий"),
-            Task(title="Односоставные предложения",
-                 description="Определите тип предложения",
-                 question="Какое предложение является безличным?",
-                 options=json.dumps(["А) Люблю грозу в начале мая.", "Б) Мне не спится.", "В) В дверь постучали.", "Г) Цыплят по осени считают."]),
-                 correct_answer="Б",
-                 explanation="Безличное предложение выражает состояние, нет и не может быть подлежащего.",
-                 category="Синтаксис",
-                 difficulty="Средний"),
-            # Лексика
-            Task(title="Синонимы и антонимы",
-                 description="Подберите синоним",
-                 question="Какое слово является синонимом к слову 'алчный'?",
-                 options=json.dumps(["А) щедрый", "Б) жадный", "В) добрый", "Г) скупой"]),
-                 correct_answer="Б",
-                 explanation="Алчный – стремящийся к наживе, жадный.",
-                 category="Лексика",
-                 difficulty="Низкий"),
-            Task(title="Фразеологизмы",
-                 description="Замените выражение синонимичным фразеологизмом",
-                 question="Каким фразеологизмом можно заменить слово 'бездельничать'?",
-                 options=json.dumps(["А) бить баклуши", "Б) вешать лапшу на уши", "В) брать быка за рога", "Г) вставлять палки в колёса"]),
-                 correct_answer="А",
-                 explanation="Бить баклуши – бездельничать.",
-                 category="Лексика",
-                 difficulty="Низкий"),
-            # Средства выразительности
-            Task(title="Тропы и фигуры речи",
-                 description="Определите средство выразительности",
-                 question="Какое средство выразительности использовано в выражении 'горькая радость'?",
-                 options=json.dumps(["А) метафора", "Б) оксюморон", "В) эпитет", "Г) сравнение"]),
-                 correct_answer="Б",
-                 explanation="Оксюморон – сочетание несочетаемого (горькая радость).",
-                 category="Средства выразительности",
-                 difficulty="Высокий"),
-        ]
-        db.session.add_all(sample_tasks)
-        db.session.commit()
-
-
-# === МАРШРУТЫ ===
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+
+    if request.method == 'POST':
+        login_input = request.form.get('login', '').strip()
+        password = request.form.get('password', '')
+
+        user = User.query.filter(
+            (User.username == login_input) | (User.email == login_input.lower())
+        ).first()
+
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for('profile'))
+        else:
+            flash('Неверное имя пользователя/email или пароль', 'error')
+
+    return render_template('login.html')
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('profile'))
 
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -260,40 +94,14 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        # Создаём запись прогресса
-        progress = UserProgress(user_id=user.id)
-        db.session.add(progress)
-        db.session.commit()
-
         flash('Регистрация успешна! Теперь вы можете войти.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('profile'))
-
-    if request.method == 'POST':
-        login_input = request.form.get('login', '').strip()
-        password = request.form.get('password', '')
-
-        user = User.query.filter(
-            (User.username == login_input) | (User.email == login_input.lower())
-        ).first()
-
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for('profile'))
-        else:
-            flash('Неверное имя пользователя/email или пароль', 'error')
-
-    return render_template('login.html')
-
-
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
@@ -302,95 +110,353 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
-    completed_tasks = UserTask.query.filter_by(user_id=current_user.id, completed=True).all()
-    task_details = []
-    for ut in completed_tasks:
-        task = Task.query.get(ut.task_id)
-        if task:
-            task_details.append({'task': task, 'is_correct': ut.is_correct, 'completed_at': ut.completed_at})
+    return render_template('profile.html', user=current_user)
 
-    if progress:
-        themes = [progress.theme1_completed, progress.theme2_completed,
-                  progress.theme3_completed, progress.theme4_completed]
-        completed = sum(themes)
-        percent = int((completed / 4) * 100)
-    else:
-        percent = 0
 
-    return render_template('profile.html', user=current_user, progress=progress, percent=percent,
-                           completed_tasks=task_details)
+@app.route('/upload_avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    if 'avatar' not in request.files:
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('profile'))
+
+    file = request.files['avatar']
+    if file.filename == '':
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('profile'))
+
+    if file:
+        ext = file.filename.rsplit('.', 1)[-1].lower()
+        filename = secure_filename(f"user_{current_user.id}.{ext}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        current_user.avatar = f'/static/uploads/{filename}'
+        db.session.commit()
+        flash('Аватар успешно обновлён', 'success')
+
+    return redirect(url_for('profile'))
+
+
+@app.route('/api/progress_data')
+@login_required
+def progress_data():
+    skills = ['Орфография', 'Пунктуация', 'Анализ текста', 'Изложение', 'Сочинение']
+    skill_scores = {}
+    total_by_skill = {skill: 0 for skill in skills}
+    completed_by_skill = {skill: 0 for skill in skills}
+
+    progress_records = UserProgress.query.filter_by(user_id=current_user.id).all()
+
+    for record in progress_records:
+        if record.skill in total_by_skill:
+            total_by_skill[record.skill] += 1
+            if record.completed:
+                completed_by_skill[record.skill] += 1
+
+    for skill in skills:
+        if total_by_skill[skill] > 0:
+            skill_scores[skill] = round((completed_by_skill[skill] / total_by_skill[skill]) * 100)
+        else:
+            skill_scores[skill] = 0
+
+    return jsonify(skill_scores)
+
+
+@app.route('/api/problem_topics')
+@login_required
+def problem_topics():
+    problem_topics = []
+    progress_records = UserProgress.query.filter_by(user_id=current_user.id).all()
+
+    for record in progress_records:
+        if record.total_attempts > 0:
+            success_rate = (record.correct_attempts / record.total_attempts) * 100
+            if success_rate < 60 and not record.completed:
+                problem_topics.append({
+                    'id': record.topic_id,
+                    'name': record.topic_name,
+                    'success_rate': round(success_rate)
+                })
+
+    problem_topics.sort(key=lambda x: x['success_rate'])
+    return jsonify(problem_topics[:10])
+
+
+@app.route('/api/checklist', methods=['GET'])
+@login_required
+def get_checklist():
+    items = ChecklistItem.query.filter_by(user_id=current_user.id).all()
+    return jsonify([{
+        'id': item.id,
+        'topic_id': item.topic_id,
+        'topic_name': item.topic_name,
+        'checked': item.checked
+    } for item in items])
+
+
+@app.route('/api/checklist/toggle/<int:item_id>', methods=['POST'])
+@login_required
+def toggle_checklist(item_id):
+    item = ChecklistItem.query.filter_by(id=item_id, user_id=current_user.id).first()
+    if item:
+        item.checked = not item.checked
+        db.session.commit()
+        return jsonify({'success': True, 'checked': item.checked})
+    return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+
+@app.route('/api/checklist/init', methods=['POST'])
+@login_required
+def init_checklist():
+    existing = ChecklistItem.query.filter_by(user_id=current_user.id).first()
+    if existing:
+        return jsonify({'success': True, 'message': 'Checklist already exists'})
+
+    topics = [
+        (1, 'Сжатое изложение'),
+        (2, 'Сочинение-рассуждение'),
+        (3, 'Выразительные средства лексики и фразеологии'),
+        (4, 'Правописание приставок'),
+        (5, 'Правописание суффиксов'),
+        (6, 'Правописание Н и НН'),
+        (7, 'Слитное и раздельное написание НЕ'),
+        (8, 'Знаки препинания в простом предложении'),
+        (9, 'Знаки препинания в сложном предложении'),
+        (10, 'Анализ текста'),
+    ]
+
+    for topic_id, topic_name in topics:
+        item = ChecklistItem(
+            user_id=current_user.id,
+            topic_id=topic_id,
+            topic_name=topic_name,
+            checked=False
+        )
+        db.session.add(item)
+
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/achievements')
+@login_required
+def get_achievements():
+    earned = UserAchievement.query.filter_by(user_id=current_user.id).all()
+    earned_ids = [a.achievement_id for a in earned]
+
+    all_achievements = [
+        {'id': 1, 'name': 'Первые шаги', 'description': 'Завершено 5 заданий', 'icon': '🌟'},
+        {'id': 2, 'name': 'Знаток орфографии', 'description': '100% тем по орфографии', 'icon': '📝'},
+        {'id': 3, 'name': 'Мастер пунктуации', 'description': '100% тем по пунктуации', 'icon': '🔖'},
+        {'id': 4, 'name': 'Аналитик', 'description': '100% тем по анализу текста', 'icon': '🔍'},
+        {'id': 5, 'name': 'Серебряный птенец', 'description': 'Решено 25 заданий', 'icon': '🥈'},
+        {'id': 6, 'name': 'Золотой соловей', 'description': 'Решено 50 заданий', 'icon': '🥇'},
+        {'id': 7, 'name': 'Трудоголик', 'description': 'Занимался 7 дней подряд', 'icon': '⚡'},
+    ]
+
+    achievements_with_status = []
+    for ach in all_achievements:
+        achievements_with_status.append({
+            'id': ach['id'],
+            'name': ach['name'],
+            'description': ach['description'],
+            'icon': ach['icon'],
+            'earned': ach['id'] in earned_ids
+        })
+
+    return jsonify(achievements_with_status)
+
+
+@app.route('/api/check_achievements')
+@login_required
+def check_achievements():
+    completed_count = UserProgress.query.filter_by(
+        user_id=current_user.id, completed=True
+    ).count()
+
+    achievements_to_award = []
+
+    if completed_count >= 5:
+        achievements_to_award.append((1, 'Первые шаги', 'Завершено 5 заданий', '🌟'))
+
+    if completed_count >= 25:
+        achievements_to_award.append((5, 'Серебряный птенец', 'Решено 25 заданий', '🥈'))
+
+    if completed_count >= 50:
+        achievements_to_award.append((6, 'Золотой соловей', 'Решено 50 заданий', '🥇'))
+
+    for ach_id, name, desc, icon in achievements_to_award:
+        existing = UserAchievement.query.filter_by(
+            user_id=current_user.id, achievement_id=ach_id
+        ).first()
+        if not existing:
+            new_ach = UserAchievement(
+                user_id=current_user.id,
+                achievement_id=ach_id,
+                achievement_name=name,
+                achievement_description=desc,
+                icon=icon
+            )
+            db.session.add(new_ach)
+
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/criteria')
+def criteria():
+    return render_template('criteria.html')
+
+
+@app.route('/cheatsheet')
+def cheatsheet():
+    return render_template('cheatsheet.html')
+
+
+TASKS_DATA = {
+    'task5': {
+        'name': 'Задание 5 - Пунктуация',
+        'description': 'Расставьте знаки препинания. Укажите все цифры, на месте которых должны стоять запятые/тире/двоеточие/кавычки.',
+        'tasks': [
+            {'id': 1, 'text': 'Суздальский музей деревянного зодчества (1) настоящий городок (2) построенный без единого гвоздя. Мельницы (3) церковь (4) дома (5) амбары и бани (6) всё привезено сюда из разных сёл.', 'answer': '17'},
+            {'id': 2, 'text': 'Лабиринты Заяцкого острова (1) настоящая загадка Соловецкого архипелага. Тайна (2) завесу которой пока никто не может приподнять (3) манит к себе туристов.', 'answer': '2689'},
+            {'id': 3, 'text': 'Долина гейзеров (1) природная достопримечательность Камчатского края. Уникальные термальные источники (2) грязевые котлы (3) водопады и озёра (4) всё это разбросано по каньону реки.', 'answer': '158'},
+            {'id': 4, 'text': 'Красивая природа (1) обилие бурных рек (2) и живописных озёр (3) превращают Русский Север в райский уголок. Каким бы ни был круг ваших интересов (4) оказавшись в этих краях (5) вы почувствуете себя как дома.', 'answer': '1356'},
+            {'id': 5, 'text': 'Известный учёный А.В. Ополовников в книге (1) Русский Север (2) писал: (3) Замечательнейшие события нашей истории записаны не только на страницах летописей (4).', 'answer': '1234'},
+        ]
+    },
+    'task6': {
+        'name': 'Задание 6 - Орфография',
+        'description': 'Укажите варианты ответов, в которых дано ВЕРНОЕ объяснение написания выделенного слова.',
+        'tasks': [
+            {'id': 1, 'text': '1) СНИМАТЬ (кино) – написание безударной чередующейся гласной в корне слова зависит от места ударения.\n2) КОЛЬЦЕВАЯ (композиция) – в суффиксе имени прилагательного после Ц без ударения пишется буква Е.\n3) ОПРЕДЕЛЯЕМОЕ (слово) – написание буквы Е в суффиксе страдательного причастия настоящего времени определяется принадлежностью к I спряжению глагола.\n4) НОЖНИЦЫ – в окончании имени существительного после Ц пишется буква Ы.\n5) БЕСПОЛЕЗНЫЙ (совет) – на конце приставки перед буквой, обозначающей звонкий согласный звук, пишется буква С.', 'answer': '234'},
+            {'id': 2, 'text': '1) ОТПИЛИТЬ – на конце приставки перед буквой, обозначающей глухой согласный звук, пишется буква Т.\n2) БЛЕСТЯЩИЙ – написание безударной гласной в корне проверяется подбором однокоренного слова блеск.\n3) НЕРЯШЛИВЫЙ – НЕ пишется слитно с именем прилагательным, которое не употребляется без НЕ.\n4) ЗЕМЛЯНОЙ – в суффиксе имени прилагательного -ЯН- пишется одна буква Н.\n5) ИЮНЬСКИЙ – буква Ь указывает на мягкость предшествующего согласного.', 'answer': '345'},
+            {'id': 3, 'text': '1) (говорит) ПО-ГРУЗИНСКИ – наречие пишется через дефис, так как есть приставка ПО- и суффикс -И.\n2) СЖИМАТЬ (кулаки) – правописание чередующейся гласной в корне определяется наличием суффикса -А-.\n3) НЕ НАМЕРЕН – частица НЕ с кратким страдательным причастием пишется раздельно.\n4) ПЛЕЩУЩИЙСЯ – в действительном причастии настоящего времени, образованном от основы глагола I спряжения, пишется суффикс -УЩ-.\n5) СКОРРЕКТИРОВАТЬ – на конце приставки перед буквой, обозначающей глухой согласный звук, пишется буква С.', 'answer': '124'},
+        ]
+    },
+    'task8': {
+        'name': 'Задание 8 - Грамматические нормы',
+        'description': 'Раскройте скобки и запишите слово в правильной форме.',
+        'tasks': [
+            {'id': 1, 'text': '(Пятьдесят) километрами ниже по реке находилась сторожка лесника.', 'answer': 'пятьюдесятью'},
+            {'id': 2, 'text': 'По (обе) сторонам дороги цвели яблони.', 'answer': 'обеим'},
+            {'id': 3, 'text': 'Бледный язычок (пламя) костра светился в темноте.', 'answer': 'пламени'},
+            {'id': 4, 'text': 'Для приготовления десерта понадобится банка консервированных (абрикосы).', 'answer': 'абрикосов'},
+            {'id': 5, 'text': 'Установка оборудования для фильтрации воды в будущем (сберечь) здоровье жителей города.', 'answer': 'сбережет'},
+        ]
+    },
+    'task9': {
+        'name': 'Задание 9 - Словосочетания',
+        'description': 'Замените словосочетание синонимичным с указанной связью.',
+        'tasks': [
+            {'id': 1, 'text': 'Замените словосочетание «плавательный бассейн» (связь согласование) на синонимичное со связью управление.', 'answer': 'бассейн для плавания'},
+            {'id': 2, 'text': 'Замените словосочетание «слушать с вниманием» (связь управление) на синонимичное со связью примыкание.', 'answer': 'слушать внимательно'},
+            {'id': 3, 'text': 'Замените словосочетание «гнездо глухаря» (связь управление) на синонимичное со связью согласование.', 'answer': 'глухариное гнездо'},
+            {'id': 4, 'text': 'Замените словосочетание «утренняя прогулка» (связь согласование) на синонимичное со связью примыкание.', 'answer': 'прогулка утром'},
+            {'id': 5, 'text': 'Замените словосочетание «день без ветра» (связь управление) на синонимичное со связью согласование.', 'answer': 'безветренный день'},
+        ]
+    },
+    'essays': {
+        'name': 'Темы сочинений 13.3',
+        'description': 'Выберите тему и напишите сочинение-рассуждение.',
+        'tasks': [
+            {'id': 1, 'text': 'Какого человека можно назвать по-настоящему сильным? (по тексту М. Горького)'},
+            {'id': 2, 'text': 'Что могут сказать о человеке его поступки? (по тексту К.Г. Паустовского)'},
+            {'id': 3, 'text': 'В каких поступках раскрывается характер человека? (по тексту Ю.Я. Яковлева)'},
+            {'id': 4, 'text': 'Чем опасны необдуманные поступки? (по тексту Ю.Я. Яковлева)'},
+            {'id': 5, 'text': 'Какова роль справедливости в жизни человека? (по тексту Л. Пантелеева)'},
+            {'id': 6, 'text': 'Как в годы войны люди проявляли мужество? (по тексту К.Г. Паустовского)'},
+            {'id': 7, 'text': 'Что значит быть добрым? (по тексту Ю.Я. Яковлева)'},
+            {'id': 8, 'text': 'В чём проявляется материнская любовь? (по тексту В.П. Астафьева)'},
+        ]
+    }
+}
 
 
 @app.route('/tasks')
-@login_required
 def tasks():
-    all_tasks = Task.query.all()
-    categories = {}
-    for task in all_tasks:
-        cat = task.category or "Без категории"
-        if cat not in categories:
-            categories[cat] = []
-        categories[cat].append(task)
-    return render_template('tasks.html', categories=categories)
+    return render_template('tasks_catalog.html', tasks_data=TASKS_DATA)
 
 
-@app.route('/task/<int:task_id>')
+@app.route('/task/<task_type>/<int:task_id>')
+def show_task(task_type, task_id):
+    if task_type in TASKS_DATA:
+        for task in TASKS_DATA[task_type]['tasks']:
+            if task['id'] == task_id:
+                return render_template('task_detail.html', 
+                                       task_type=task_type,
+                                       task=task,
+                                       task_name=TASKS_DATA[task_type]['name'])
+    return redirect(url_for('tasks'))
+
+
+@app.route('/api/submit_task', methods=['POST'])
 @login_required
-def view_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    user_task = UserTask.query.filter_by(user_id=current_user.id, task_id=task_id).first()
-    options = json.loads(task.options) if task.options else []
-    return render_template('task.html', task=task, options=options, user_task=user_task)
-
-
-@app.route('/task/<int:task_id>/submit', methods=['POST'])
-@login_required
-def submit_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    answer = request.form.get('answer')
-    is_correct = (answer == task.correct_answer)
-
-    user_task = UserTask.query.filter_by(user_id=current_user.id, task_id=task_id).first()
-    if not user_task:
-        user_task = UserTask(user_id=current_user.id, task_id=task_id)
-        db.session.add(user_task)
-
-    user_task.completed = True
-    user_task.user_answer = answer
-    user_task.is_correct = is_correct
-    user_task.completed_at = datetime.utcnow()
-    db.session.commit()
-
-    flash(f'Ответ {"правильный" if is_correct else "неправильный"}. {task.explanation}',
-          'success' if is_correct else 'error')
-    return redirect(url_for('view_task', task_id=task_id))
-
-
-@app.route('/update_checklist', methods=['POST'])
-@login_required
-def update_checklist():
+def submit_task():
     data = request.get_json()
-    theme_id = data.get('theme')
-    checked = data.get('checked')
-    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
-    if progress:
-        if theme_id == 'theme1':
-            progress.theme1_completed = checked
-        elif theme_id == 'theme2':
-            progress.theme2_completed = checked
-        elif theme_id == 'theme3':
-            progress.theme3_completed = checked
-        elif theme_id == 'theme4':
-            progress.theme4_completed = checked
-        db.session.commit()
-    return jsonify({'status': 'ok'})
+    user_answer = data.get('answer', '').strip().lower()
+    correct_answer = data.get('correct_answer', '').strip().lower()
+    
+    is_correct = (user_answer == correct_answer)
+    
+    if is_correct:
+        flash('Верно!', 'success')
+    else:
+        flash(f'Неверно. Правильный ответ: {correct_answer}', 'error')
+    
+    return jsonify({'correct': is_correct, 'correct_answer': correct_answer})
 
 
 @app.route('/theory')
-@login_required
 def theory():
-    return render_template('theory.html')
+    theory_topics = {
+        'punctuation': {
+            'name': 'Пунктуация',
+            'content': 'Тире между подлежащим и сказуемым, обособление определений и приложений, обособление обстоятельств, вводные слова.'
+        },
+        'grammar': {
+            'name': 'Грамматические ошибки',
+            'content': 'Синтаксические ошибки: присоединение дополнения, несочетаемые понятия, разные части речи как однородные члены.'
+        },
+        'sentence_types': {
+            'name': 'Типы предложений',
+            'content': 'Определённо-личные, неопределённо-личные, обобщённо-личные, безличные, назывные.'
+        },
+        'bsp': {
+            'name': 'Знаки в БСП',
+            'content': 'Двоеточие (АЧП): а именно, что, потому что. Тире (КЕПКА): когда, если, поэтому, как, но.'
+        },
+        'roots': {
+            'name': 'Корни-омонимы',
+            'content': 'гор- (загорать) НО горевать; кос- (касаться) НО косить; мер- (умереть) НО примерять; мир- (замирать) НО примирять.'
+        },
+        'spelling': {
+            'name': 'Орфография',
+            'content': 'Приставки на -З/-С, ПРЕ-/ПРИ-, И/Ы после приставок, пол-/полу-, Н/НН в причастиях и прилагательных.'
+        },
+        'express': {
+            'name': 'Средства выразительности',
+            'content': 'Эпитет, метафора, олицетворение, сравнение, гипербола, литота, фразеологизм, антонимы, синонимы.'
+        },
+        'phrases': {
+            'name': 'Словосочетания',
+            'content': 'Согласование, управление, примыкание. Правило СУП для замены словосочетаний.'
+        }
+    }
+    return render_template('theory.html', theory_topics=theory_topics)
+
+
+@app.route('/theory/<topic>')
+def theory_topic(topic):
+    theory_topics = {
+        'punctuation': 'ТИРЕ МЕЖДУ ПОДЛЕЖАЩИМ И СКАЗУЕМЫМ:\n✅ Ставится: Сущ. — Сущ.; н.ф.гл. — н.ф.гл.\n❌ НЕ ставится: есть, как, будто, словно, не, личн.мест.\n\nОБОСОБЛЕНИЕ ОПРЕДЕЛЕНИЙ:\n- Причастный оборот ПОСЛЕ слова → запятые\n- Относится к ЛИЧНОМУ МЕСТОИМЕНИЮ → запятые\n\nОБОСОБЛЕНИЕ ОБСТОЯТЕЛЬСТВ:\n- Деепричастный оборот → запятые\n- Сравнительный оборот (как, словно, будто) → запятые',
+        'grammar': 'ЧАСТЫЕ ГРАММАТИЧЕСКИЕ ОШИБКИ:\n\n1. Присоединение к однородным сказуемым дополнения, которое управляется лишь одним из сказуемых\n❌ "Необходимо сохранять и помнить о великих людях"\n✅ "Необходимо сохранять память... и помнить об их подвиге"\n\n2. Соединение несочетаемых понятий\n❌ "Я люблю водоемы и собак в том числе"\n\n3. Разные части речи как однородные\n❌ "Домашние обязанности — мытьё полов, посидеть с братом"\n\n4. Неверное использование местоимений\n❌ "Она одета в шубку, в руке она держит варежку, на ней платок"',
+        'sentence_types': 'ТИПЫ ПРЕДЛОЖЕНИЙ ПО СОСТАВУ:\n\nОПРЕДЕЛЁННО-ЛИЧНЫЕ: сказуемое без подлежащего, можно подставить Я, МЫ, ТЫ, ВЫ\nпример: Приходи в гости! Хочу съездить на море.\n\nНЕОПРЕДЕЛЁННО-ЛИЧНЫЕ: можно подставить ОНИ\nпример: В дверь стучат.\n\nОБОБЩЁННО-ЛИЧНЫЕ: пословицы, поговорки\nпример: Любишь кататься — люби и саночки возить.\n\nБЕЗЛИЧНЫЕ: нельзя подставить Я, ТЫ, ОНИ\nпример: Холодает. Меня знобит.\n\nНАЗЫВНЫЕ: только подлежащее\nпример: Поля. Пастбища. Стадо.',
+        'bsp': 'БСП: ДВОЕТОЧИЕ И ТИРЕ\n\nДВОЕТОЧИЕ (АЧП):\n1. А именно (пояснение): [В доме тишина]: скрипнула дверь\n2. Что (дополнение): [Все знают]: бережёного Бог бережёт\n3. Почему (причина): [Страшно]: материя обращалась в пыль\n\nТИРЕ (КЕПКА):\n1. Когда: [Настанет утро] — [двинемся в путь]\n2. Если: [Назвался груздем] — [полезай в кузов]\n3. Поэтому: [Солнце встаёт] — [будет жаркий день]\n4. Как: [Молвит слово] — [соловей поёт]\n5. А, НО: [Службу оставил] — [быстро поменял решение]',
+        'express': 'СРЕДСТВА ВЫРАЗИТЕЛЬНОСТИ:\n\nЭПИТЕТ: образное определение — "золотая осень"\nМЕТАФОРА: скрытое сравнение — "горит восток зарёю новой"\nОЛИЦЕТВОРЕНИЕ: неживое как живое — "ветер завывал"\nСРАВНЕНИЕ: с союзами как, словно, будто — "лёд, как сахар"\nГИПЕРБОЛА: преувеличение — "сто раз говорил"\nЛИТОТА: преуменьшение — "мальчик с пальчик"\nФРАЗЕОЛОГИЗМ: устойчивое выражение — "повесить нос"'
+    }
+    content = theory_topics.get(topic, 'Информация временно недоступна')
+    return render_template('theory_detail.html', topic=topic, content=content)
 
 
 if __name__ == '__main__':
