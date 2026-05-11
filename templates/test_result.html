@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты теста | ОГЭRUS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .result-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 32px;
+            color: #4c1d95;
+            margin-bottom: 10px;
+        }
+        .score {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(168,85,247,0.1);
+            border-radius: 32px;
+        }
+        .score-correct { color: #166534; }
+        .score-wrong { color: #991b1b; }
+        .result-item {
+            border-bottom: 1px solid rgba(216,180,254,0.5);
+            padding: 20px 0;
+        }
+        .result-question {
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .user-answer {
+            margin: 8px 0;
+        }
+        .correct { color: #166534; background: #dcfce7; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+        .wrong { color: #991b1b; background: #fee2e2; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+        .correct-answer {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #4c1d95;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 32px;
+            background: linear-gradient(105deg, #f59e0b, #ec4899);
+            color: white;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    {% include '_header.html' %}
+
+    <div class="result-container">
+        <h1>Результаты теста</h1>
+        <div class="score">
+            Правильных ответов: {{ correct }} из {{ total }}<br>
+            <span class="{{ 'score-correct' if correct >= total/2 else 'score-wrong' }}">
+                {{ (correct / total * 100)|round|int }}%
+            </span>
+        </div>
+
+        {% for res in results %}
+        <div class="result-item">
+            <div class="result-question">
+                <strong>Вопрос {{ loop.index }}:</strong>
+                <div style="font-weight: normal; margin-top: 8px;">{{ res.text[:200] }}{% if res.text|length > 200 %}…{% endif %}</div>
+            </div>
+            <div class="user-answer">
+                <span class="{{ 'correct' if res.is_correct else 'wrong' }}">
+                    Ваш ответ: {{ res.user_answer if res.user_answer else '(не дан)' }}
+                </span>
+            </div>
+            {% if not res.is_correct %}
+            <div class="correct-answer">
+                Правильный ответ: {{ res.correct_answer }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="text-align: center;">
+            <a href="{{ url_for('tasks.tasks') }}" class="btn-back">Вернуться в каталог</a>
+        </div>
+    </div>
+
+    <div class="footer">2026 Подготовка ОГЭ Русский язык</div>
+</body>
+</html>

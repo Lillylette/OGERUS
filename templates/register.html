@@ -4,233 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация | ОГЭRUS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-            background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 40%, #fef3c7 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: -20%;
-            right: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, rgba(192, 132, 252, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -10%;
-            left: -5%;
-            width: 450px;
-            height: 450px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, rgba(251, 191, 36, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
-            position: relative;
-            z-index: 10;
-        }
-
-        .logo {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #a855f7, #ec4899, #fbbf24);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-
-        .logo a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .nav-link {
-            color: #7e22ce;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 24px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .register-container {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            padding: 48px 44px;
-            border-radius: 48px;
-            max-width: 480px;
-            width: 100%;
-            border: 1.5px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .register-title {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(145deg, #a21caf, #fbbf24, #f43f5e);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .register-subtitle {
-            text-align: center;
-            color: #6b21a5;
-            font-weight: 500;
-            margin-bottom: 32px;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            color: #4c1d95;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1.5px solid rgba(216, 180, 254, 0.6);
-            border-radius: 20px;
-            font-size: 15px;
-            color: #1e1b4b;
-            transition: all 0.25s;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: #ec4899;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px 24px;
-            background: linear-gradient(105deg, #f59e0b, #ec4899);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
-            margin: 32px 0 24px;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 30px -6px rgba(236, 72, 153, 0.4);
-        }
-
-        .login-link {
-            text-align: center;
-            color: #6b21a5;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .login-link a {
-            color: #db2777;
-            text-decoration: none;
-            font-weight: 700;
-            border-bottom: 2px dotted #f9a8d4;
-            margin-left: 6px;
-        }
-
-        .flash {
-            padding: 14px 18px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            background: rgba(254, 202, 202, 0.8);
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .flash.success {
-            background: rgba(187, 247, 208, 0.8);
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 24px 20px;
-            color: #6b21a5;
-            font-weight: 500;
-            font-size: 13px;
-            background: rgba(255, 245, 250, 0.5);
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(216, 180, 254, 0.5);
-        }
-
-        @media (max-width: 500px) {
-            .register-container {
-                padding: 32px 24px;
-            }
-            .register-title {
-                font-size: 30px;
-            }
-        }
+        .main-content { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; }
+        .register-container { background:rgba(255,255,255,0.85); backdrop-filter:blur(20px); padding:48px 44px; border-radius:48px; max-width:480px; width:100%; border:1.5px solid rgba(255,255,255,0.9); box-shadow:0 20px 40px rgba(0,0,0,0.08); }
+        .register-title { font-size:36px; font-weight:800; background:linear-gradient(145deg,#a21caf,#fbbf24,#f43f5e); background-clip:text; -webkit-background-clip:text; color:transparent; margin-bottom:10px; text-align:center; }
+        .register-subtitle { text-align:center; color:#6b21a5; font-weight:500; margin-bottom:32px; font-size:14px; }
+        .form-group { margin-bottom:20px; }
+        .form-label { display:block; color:#4c1d95; font-weight:600; font-size:14px; margin-bottom:8px; }
+        .form-input { width:100%; padding:14px 18px; background:rgba(255,255,255,0.7); border:1.5px solid rgba(216,180,254,0.6); border-radius:20px; font-size:15px; color:#1e1b4b; transition:all 0.25s; outline:none; }
+        .form-input:focus { border-color:#ec4899; background:white; box-shadow:0 0 0 4px rgba(236,72,153,0.1); }
+        .btn-submit { width:100%; padding:16px 24px; background:linear-gradient(105deg,#f59e0b,#ec4899); color:white; border:none; border-radius:40px; font-weight:700; font-size:16px; cursor:pointer; transition:all 0.3s; box-shadow:0 8px 20px rgba(236,72,153,0.25); margin:32px 0 24px; }
+        .btn-submit:hover { transform:translateY(-3px); box-shadow:0 16px 30px -6px rgba(236,72,153,0.4); }
+        .login-link { text-align:center; color:#6b21a5; font-size:14px; }
+        .login-link a { color:#db2777; text-decoration:none; font-weight:700; border-bottom:2px dotted #f9a8d4; margin-left:6px; }
+        .flash { padding:14px 18px; border-radius:20px; margin-bottom:20px; font-weight:500; font-size:14px; }
+        .flash.error { background:rgba(254,202,202,0.8); color:#991b1b; border:1px solid #fecaca; }
+        .flash.success { background:rgba(187,247,208,0.8); color:#166534; border:1px solid #bbf7d0; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo"><a href="/">OGERUS</a></div>
-        <div class="nav-links">
-            <a href="/login" class="nav-link">Вход</a>
-        </div>
-    </div>
+    {% include '_header.html' %}
 
     <div class="main-content">
         <div class="register-container">
@@ -243,39 +37,33 @@
                 {% endfor %}
             {% endwith %}
 
-            <form method="POST" action="/register">
+            <form method="POST" action="{{ url_for('auth.register') }}">
                 <div class="form-group">
                     <label class="form-label" for="username">Имя пользователя</label>
                     <input type="text" id="username" name="username" class="form-input" placeholder="solovey_rus" required>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label" for="email">Email</label>
                     <input type="email" id="email" name="email" class="form-input" placeholder="solovey@example.com" required>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label" for="password">Пароль</label>
                     <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label" for="password_confirm">Подтверждение пароля</label>
                     <input type="password" id="password_confirm" name="password_confirm" class="form-input" placeholder="••••••••" required>
                 </div>
-
                 <button type="submit" class="btn-submit">Зарегистрироваться</button>
             </form>
 
             <div class="login-link">
                 Уже есть аккаунт?
-                <a href="/login">Войти</a>
+                <a href="{{ url_for('auth.login') }}">Войти</a>
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        2026 Подготовка ОГЭ Русский язык
-    </div>
+    <div class="footer">2026 Подготовка ОГЭ Русский язык</div>
 </body>
 </html>

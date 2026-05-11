@@ -4,294 +4,425 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Шпаргалка | ОГЭRUS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-            background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 40%, #fef3c7 100%);
-            min-height: 100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        .header {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #faf5ff;
+            color: #1e1b2f;
+            line-height: 1.5;
+        }
+        /* Стили хедера (как на главной) */
+        .site-header {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid #e9d5ff;
             padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
             position: sticky;
             top: 0;
             z-index: 100;
+            display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .logo {
-            font-size: 26px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #a855f7, #ec4899, #fbbf24);
+        .logo h2 {
+            background: linear-gradient(135deg, #a21caf, #f97316, #ec4899);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
+            font-size: 28px;
+            letter-spacing: -0.5px;
         }
-        .logo a { text-decoration: none; color: inherit; }
-
-        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .nav-link { color: #7e22ce; text-decoration: none; font-weight: 600; }
-        .nav-link:hover { color: #ec4899; }
-
+        .nav-links a {
+            margin-left: 28px;
+            text-decoration: none;
+            font-weight: 600;
+            color: #6b21a5;
+            transition: 0.2s;
+        }
+        .nav-links a:hover {
+            color: #f43f5e;
+        }
         .main-content {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 40px auto;
             padding: 0 24px;
         }
-
         h1 {
-            font-size: 42px;
+            font-size: 48px;
             background: linear-gradient(145deg, #a21caf, #fbbf24, #f43f5e);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             text-align: center;
         }
-
         .subtitle {
             text-align: center;
             color: #6b21a5;
             margin-bottom: 40px;
-            font-size: 18px;
+            font-size: 1.2rem;
+            font-weight: 500;
         }
-
         .topic-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 12px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
         }
-
         .topic-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.6);
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.7);
             border: 1px solid #d8b4fe;
-            border-radius: 40px;
+            border-radius: 60px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             color: #7e22ce;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
         }
-        .topic-btn:hover { background: white; transform: translateY(-2px); }
+        .topic-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(168, 85, 247, 0.15);
+        }
         .topic-btn.active {
             background: linear-gradient(105deg, #f59e0b, #ec4899);
             color: white;
             border: none;
+            box-shadow: 0 8px 18px rgba(236, 72, 153, 0.3);
         }
-
-        .topic-content { display: none; }
-        .topic-content.active { display: block; }
-
+        .topic-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .topic-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .cheatsheet-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
             border-radius: 48px;
             padding: 32px 40px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
             margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
         }
-
         .cheatsheet-card h2 {
             color: #4c1d95;
-            margin-bottom: 20px;
             font-size: 28px;
-            border-left: 5px solid #ec4899;
+            margin-bottom: 24px;
+            border-left: 6px solid #ec4899;
             padding-left: 20px;
         }
-
         .cheatsheet-card h3 {
-            color: #7e22ce;
-            margin: 20px 0 12px 0;
             font-size: 20px;
+            margin: 20px 0 10px 0;
+            color: #b91c6b;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .rule-box {
+            background: rgba(168, 85, 247, 0.06);
+            border-left: 4px solid #c084fc;
+            padding: 16px 20px;
+            border-radius: 24px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .exception {
+            background: #fff0f5;
+            border-left: 4px solid #f43f5e;
+            padding: 14px 18px;
+            border-radius: 20px;
             margin: 16px 0;
         }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(216, 180, 254, 0.5);
-            vertical-align: top;
-        }
-        th { background: rgba(168, 85, 247, 0.1); color: #4c1d95; }
-
-        .rule-box {
-            background: rgba(168, 85, 247, 0.08);
-            padding: 15px;
+        .important {
+            background: #fef9c3;
+            border-left: 4px solid #fbbf24;
+            padding: 12px 18px;
             border-radius: 20px;
-            margin: 15px 0;
         }
-        .highlight { background: #fef3c7; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
-        .example { color: #be185d; font-style: italic; }
-
+        .example {
+            font-family: 'Courier New', monospace;
+            background: #f3e8ff;
+            padding: 8px 14px;
+            border-radius: 16px;
+            display: inline-block;
+            margin: 6px 0;
+        }
+        ul, .grid-list {
+            padding-left: 24px;
+            margin: 12px 0;
+        }
+        li {
+            margin: 8px 0;
+        }
         .footer {
             text-align: center;
-            padding: 24px;
-            color: #6b21a5;
-            background: rgba(255, 245, 250, 0.5);
-            border-top: 1px solid rgba(216, 180, 254, 0.5);
+            padding: 32px;
+            background: #1e1b2f;
+            color: #c4b5fd;
+            margin-top: 50px;
+            font-size: 14px;
         }
-
-        @media (max-width: 700px) {
-            .cheatsheet-card { padding: 24px; }
-            th, td { font-size: 14px; }
+        @media (max-width: 720px) {
+            .cheatsheet-card { padding: 20px; }
+            .topic-btn { padding: 6px 16px; font-size: 0.85rem; }
+            h1 { font-size: 32px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo"><a href="/">OGERUS</a></div>
-        <div class="nav-links">
-            <a href="/profile" class="nav-link">Профиль</a>
-            <a href="/criteria" class="nav-link">Критерии ОГЭ</a>
-            <a href="/logout" class="nav-link">Выйти</a>
-        </div>
+
+<header class="site-header">
+    <div class="logo"><h2>⚡ ОГЭRUS</h2></div>
+    <div class="nav-links">
+        <a href="{{ url_for('main.index') }}">Главная</a>
+        <a href="{{ url_for('tasks.tasks') }}">Тесты</a>
+        <a href="{{ url_for('theory.theory') }}">Теория</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile.profile') }}">Профиль</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}">Войти</a>
+        {% endif %}
+        <a href="{{ url_for('theory.cheatsheet') }}" style="background:#f3e8ff; border-radius:40px; padding:6px 18px;">Шпаргалка</a>
+    </div>
+</header>
+
+<div class="main-content">
+    <h1>Полная шпаргалка для ОГЭ</h1>
+    <div class="subtitle">Правила, исключения, примеры — всё, что нужно знать</div>
+
+    <div class="topic-buttons">
+        <button class="topic-btn active" data-topic="task6">Задание 6 (Орфограммы)</button>
+        <button class="topic-btn" data-topic="task8">Задание 8 (Синтаксис)</button>
+        <button class="topic-btn" data-topic="task9">Задание 9 (Сложные предложения)</button>
+        <button class="topic-btn" data-topic="bsp">БСП (Бессоюзные)</button>
+        <button class="topic-btn" data-topic="punctuation">Пунктуация (все правила)</button>
+        <button class="topic-btn" data-topic="express">Средства выразительности</button>
     </div>
 
-    <div class="main-content">
-        <h1>📖 Шпаргалка для подготовки к ОГЭ</h1>
-        <div class="subtitle">Все правила в одном месте</div>
-
-        <div class="topic-buttons">
-            <button class="topic-btn active" data-topic="task6">Задание 6</button>
-            <button class="topic-btn" data-topic="task8">Задание 8</button>
-            <button class="topic-btn" data-topic="task9">Задание 9</button>
-            <button class="topic-btn" data-topic="bsp">БСП</button>
-            <button class="topic-btn" data-topic="punctuation">Пунктуация</button>
-            <button class="topic-btn" data-topic="express">Средства выразительности</button>
-        </div>
-
-        <div id="task6" class="topic-content active">
-            <div class="cheatsheet-card">
-                <h2>📝 Задание 6: Орфограммы</h2>
-                <div class="rule-box">
-                    <strong>Приставки на -З/-С:</strong> перед звонкой → З, перед глухой → С<br>
-                    <strong>ПРЕ-/ПРИ-:</strong> ПРЕ = "очень" или "пере-", ПРИ = приближение/присоединение/близость/неполнота<br>
-                    <strong>И/Ы после приставок:</strong> после русской приставки на согласную → Ы<br>
-                    <strong>Корни с чередованием:</strong> зависит от ударения/суффикса А/последующих согласных/значения
-                </div>
-                <div class="rule-box">
-                    <strong>Н/НН:</strong>
-                    В причастиях: есть приставка, -ова-/-ева-, зависимые слова, глагол сов.вида → НН<br>
-                    В отглагольных прилагательных: Н (кроме исключений)
-                </div>
+    <!-- ЗАДАНИЕ 6: ОРФОГРАФИЯ -->
+    <div id="task6" class="topic-content active">
+        <div class="cheatsheet-card">
+            <h2>Задание 6: Орфограммы – корни, приставки, суффиксы, Н/НН</h2>
+            
+            <h3>1. Корни с чередованием гласных</h3>
+            <div class="rule-box">
+                <strong>Зависит от суффикса -А-:</strong> <br>
+                -кас- / -кос-: касаться (есть А) → коснуться (нет А). <br>
+                -лаг- / -лож-: предлагать (А) → положить. <br>
+                -бир- / -бер-: собирать (А) → беру. <br>
+                <strong>Важно:</strong> блист-/блест-, дир-/дер-, мир-/мер-, пир-/пер-, тир-/тер-, стил-/стел-, жиг-/жег-, чит-/чет-.
+                <div class="exception">❕ Исключения: сочетать, сочетание (пишется Е, хотя есть А после корня).</div>
             </div>
-        </div>
-
-        <div id="task8" class="topic-content">
-            <div class="cheatsheet-card">
-                <h2>📝 Задание 8: Грамматические нормы</h2>
-                <div class="rule-box">
-                    <strong>Р.п. мн.ч.:</strong><br>
-                    ОВ/ЕВ: абрикосов, бананов, помидоров, носков<br>
-                    Нулевое: яблок, груш, слив, макарон, чулок<br>
-                    -ИЙ/-ЕВ: сидений, побережий, платьев
-                </div>
-                <div class="rule-box">
-                    <strong>Глаголы:</strong><br>
-                    езжай / поезжай(те)  |  ляг / лягте  |  клади / кладите<br>
-                    промок (он)  |  засох (он)  |  исчез (он)
-                </div>
-                <div class="rule-box">
-                    <strong>Числительные:</strong><br>
-                    Тв.п.: сорока, девяноста, ста, пятьюдесятью, шестьюдесятью<br>
-                    оба (м.р.) — обе (ж.р.)
-                </div>
+            <div class="rule-box">
+                <strong>Зависит от ударения:</strong> <br>
+                -гор- / -гар-: под ударением А (загар), без ударения О (загореть).<br>
+                -зор- / -зар-: под ударением то, что слышим (зори), без ударения А (заря). <span class="exception">Искл: зоревать, зорянка.</span><br>
+                -клон- / -клан-, -твор- / -твар-: под ударением А/О, без ударения О (творить, кланяться).
             </div>
-        </div>
-
-        <div id="task9" class="topic-content">
-            <div class="cheatsheet-card">
-                <h2>📝 Задание 9: Замена словосочетаний</h2>
-                <div class="rule-box">
-                    <strong>Запоминай: СУП</strong><br>
-                    Согласование → Управление: плавательный бассейн → бассейн для плавания<br>
-                    Управление → Примыкание: слушать с вниманием → слушать внимательно<br>
-                    Примыкание → Управление: внимательно слушать → слушать с вниманием<br>
-                    Согласование → Примыкание: утренняя прогулка → прогулка утром
-                </div>
+            <div class="rule-box">
+                <strong>Зависит от согласных на конце корня:</strong> <br>
+                -раст- / -ращ- / -рос-: перед СТ, Щ → А, перед С → О. <br>
+                <div class="exception">Исключения: <strong>росток, Ростов, Ростислав, отрасль, ростовщик</strong> (пишутся с О).</div>
+                -скак- / -скоч-: перед К → А, перед Ч → О. <br>
+                <div class="exception">Исключения: <strong>скачок, скачу</strong> (пишутся с А, хотя перед Ч).</div>
             </div>
-        </div>
-
-        <div id="bsp" class="topic-content">
-            <div class="cheatsheet-card">
-                <h2>📝 БСП: двоеточие и тире</h2>
-                <div class="rule-box">
-                    <strong>Двоеточие (АЧП):</strong><br>
-                    А именно (пояснение): [В доме тишина]: скрипнула дверь<br>
-                    Что (дополнение): [Все знают]: бережёного Бог бережёт<br>
-                    Потому что (причина): [Страшно]: материя обращалась в пыль
-                </div>
-                <div class="rule-box">
-                    <strong>Тире (КЕПКА):</strong><br>
-                    Когда: [Настанет утро] — [двинемся в путь]<br>
-                    Если: [Назвался груздем] — [полезай в кузов]<br>
-                    Поэтому: [Солнце встаёт] — [будет жаркий день]<br>
-                    Как: [Молвит слово] — [соловей поёт]<br>
-                    А, НО: [Службу оставил] — [быстро поменял решение]
-                </div>
+            <div class="rule-box">
+                <strong>Корни-омонимы:</strong> равн- (=одинаковый) / ровн- (=гладкий); мак- (погружать в жидкость) / мок- (пропускать жидкость).
             </div>
-        </div>
 
-        <div id="punctuation" class="topic-content">
-            <div class="cheatsheet-card">
-                <h2>📝 Пунктуация</h2>
-                <div class="rule-box">
-                    <strong>Тире между подлежащим и сказуемым:</strong><br>
-                    ✅ Ставится: Сущ. — Сущ.; н.ф.гл. — н.ф.гл.; числ. — числ.<br>
-                    ❌ НЕ ставится: есть, как, будто, словно, не
-                </div>
-                <div class="rule-box">
-                    <strong>Обособление:</strong><br>
-                    Причастный оборот после слова → запятые<br>
-                    Относится к личному местоимению → запятые<br>
-                    Деепричастный оборот → запятые<br>
-                    Сравнительный оборот (как, словно, будто) → запятые
-                </div>
+            <h3>2. Приставки ПРЕ- и ПРИ-</h3>
+            <div class="rule-box">
+                <strong>ПРИ-</strong> = приближение (приехать), присоединение (приклеить), близость (пришкольный), неполнота действия (приоткрыть), доведение до конца (придумать).<br>
+                <strong>ПРЕ-</strong> = очень (прекрасный), значение ПЕРЕ- (преградить).<br>
+                <div class="exception">Исключения: превратность, причудливый, приоритет, преамбула, президиум, привилегия, примитивный – запомнить!</div>
             </div>
-        </div>
 
-        <div id="express" class="topic-content">
-            <div class="cheatsheet-card">
-                <h2>📝 Средства выразительности</h2>
-                <div class="rule-box">
-                    <strong>Эпитет:</strong> образное определение — "золотая осень"<br>
-                    <strong>Метафора:</strong> скрытое сравнение — "горит восток зарёю новой"<br>
-                    <strong>Олицетворение:</strong> неживое как живое — "ветер завывал"<br>
-                    <strong>Сравнение:</strong> с союзами как, словно, будто — "лёд, как сахар"<br>
-                    <strong>Фразеологизм:</strong> устойчивое выражение — "повесить нос"
-                </div>
+            <h3>3. Приставки на -З / -С</h3>
+            <div class="rule-box">
+                <strong>Правило:</strong> перед звонкой согласной пишем З (разбежать), перед глухой – С (рассказать).<br>
+                <div class="exception">Внимание: всегда пишется С у приставки С- (сделать) – она неизменяемая. З- нет!</div>
+                Также: без-/бес-, воз-/вос-, вз-/вс-, из-/ис-, низ-/нис-, раз-/рас-, роз-/рос-.
+            </div>
+
+            <h3>4. И / Ы после приставок</h3>
+            <div class="rule-box">
+                После русских приставок на согласную → Ы (играть → сыграть, искать → разыскать).<br>
+                Исключения: взимать, сверхинтересный, межинститутский (после сверх-, меж- сохраняется И). После иноязычных (супер-, пост-, дез-) → И: дезинфекция.
+            </div>
+
+            <h3>5. Н и НН в причастиях, отглагольных прилагательных</h3>
+            <div class="rule-box">
+                <strong>НН пишется:</strong><br>
+                - есть приставка (кроме НЕ) → решённый;<br>
+                - есть суффиксы -ова-, -ева- → маринованный;<br>
+                - есть зависимое слово → вязанный крючком шарф;<br>
+                - глагол совершенного вида (что сделать?) → купленный.<br>
+                <strong>Н в кратких причастиях</strong> (задача решена).<br>
+                <div class="exception">Отглагольные прилагательные: Н (жареный картофель, незваный гость). Исключения на НН: жела́нный, священный, нежданный, негаданный, окаянный, деланный, медленный, виденный.</div>
+            </div>
+            <div class="important">
+                В именных прилагательных: -ан-/-ян- (кожаный), -ин- (гусиный) → одна Н. Искл: стеклянный, оловянный, деревянный.
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        2026 Подготовка ОГЭ Русский язык
+    <!-- ЗАДАНИЕ 8: СИНТАКСИС -->
+    <div id="task8" class="topic-content">
+        <div class="cheatsheet-card">
+            <h2>Задание 8: Грамматическая основа, типы сказуемых, словосочетания</h2>
+            <h3>Грамматическая основа</h3>
+            <div class="rule-box">Подлежащее + сказуемое. Подлежащее может быть выражено НЕ только именем сущ., но и инфинитивом, местоимением, числительным, цельным словосочетанием.</div>
+            <h3>Типы сказуемых:</h3>
+            <ul>
+                <li><strong>Простое глагольное (ПГС):</strong> одна форма глагола (читаю, буду читать, пусть читает).</li>
+                <li><strong>Составное глагольное (СГС):</strong> вспомогательный глагол (хочу, могу, начал) + инфинитив (хочу победить).</li>
+                <li><strong>Составное именное (СИС):</strong> глагол-связка (быть, являться, стать) + именная часть (он был врачом).</li>
+            </ul>
+            <h3>Словосочетания: способы связи</h3>
+            <div class="rule-box">
+                <strong>Согласование:</strong> главное + зависимое (в роде, числе, падеже) → новая книга. <br>
+                <strong>Управление:</strong> главное требует определённого падежа (читать книгу). <br>
+                <strong>Примыкание:</strong> неизменяемое слово (говорить улыбаясь, очень добрый).
+            </div>
+            <div class="exception">Замена словосочетаний: управление на примыкание (глядел с завистью → завистливо глядел); согласование на управление (кожаный портфель → портфель из кожи).</div>
+            <h3>Односоставные предложения:</h3>
+            <ul>
+                <li><strong>Определённо-личные:</strong> глагол 1-2 л. (Иду домой).</li>
+                <li><strong>Неопределённо-личные:</strong> глагол 3 л. мн.ч. (В дверь стучат).</li>
+                <li><strong>Безличные:</strong> нет и не может быть подлежащего (Смеркается, Мне грустно).</li>
+                <li><strong>Назывные:</strong> одно существительное (Зима. Мороз.).</li>
+            </ul>
+        </div>
     </div>
 
-    <script>
-        document.querySelectorAll('.topic-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.topic-content').forEach(c => c.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById(btn.dataset.topic).classList.add('active');
-            });
+    <!-- ЗАДАНИЕ 9: СЛОЖНЫЕ ПРЕДЛОЖЕНИЯ -->
+    <div id="task9" class="topic-content">
+        <div class="cheatsheet-card">
+            <h2>Задание 9: Знаки препинания в сложных предложениях</h2>
+            <h3>1️Сложносочинённое предложение (ССП)</h3>
+            <div class="rule-box">Запятая между частями перед союзами И, ДА (=И), А, НО, ОДНАКО, ИЛИ, ЛИБО. <br> <strong>Нет запятой,</strong> если есть общий второстепенный член или общая придаточная часть: <em>Осенью птицы улетают и лес пустеет.</em> (осенью – общее обстоятельство).</div>
+            <h3>2️Сложноподчинённое предложение (СПП)</h3>
+            <div class="rule-box">
+                Придаточное отделяется запятой. <br>
+                <strong>Виды придаточных:</strong> определительные (отвечают на вопрос какой?), изъяснительные (что? о чём?), обстоятельственные (где? когда? почему? зачем? и др.).<br>
+                <strong>Несколько придаточных:</strong> последовательное, параллельное, однородное подчинение. Запятые ставятся по правилам однородных членов.
+                <div class="exception">Если между однородными придаточными союз И – запятая НЕ ставится: <span class="example">[Я знаю], (что придёт зима) и (что выпадет снег).</span></div>
+            </div>
+            <h3>Стык союзов</h3>
+            <div class="rule-box">Если рядом два подчинительных союза или сочинительный и подчинительный, то запятая ставится ТОЛЬКО если нет второй части (то, но, так). Например: Он сказал, что, если погода испортится, мы останемся. (Запятая есть, нет «то»).</div>
+        </div>
+    </div>
+
+    <!-- БСП -->
+    <div id="bsp" class="topic-content">
+        <div class="cheatsheet-card">
+            <h2>⚡ Бессоюзное сложное предложение (БСП) – знаки препинания</h2>
+            <div class="rule-box">
+                <strong>ЗАПЯТАЯ:</strong> перечисление фактов, части независимы (Я проснулся, солнце светило). <br>
+                <strong>ТОЧКА С ЗАПЯТОЙ:</strong> если внутри частей есть запятые или части менее связаны по смыслу.
+            </div>
+            <h3>▶ТИРЕ в БСП (условия, время, следствие, противопоставление)</h3>
+            <ul>
+                <li>Быстрая смена событий: Сыр выпал — с ним была плутовка такова.</li>
+                <li>Противопоставление (можно вставить а, но): Чин следовал ему — он службу вдруг оставил.</li>
+                <li>Условие / время (если / когда): Лес рубят — щепки летят.</li>
+                <li>Следствие / вывод (так что, поэтому): За всё браться — ничего не сделать.</li>
+                <li>Сравнение: Молвит слово — соловей поёт.</li>
+            </ul>
+            <h3>ДВОЕТОЧИЕ в БСП (причина, пояснение, дополнение)</h3>
+            <ul>
+                <li><strong>Причина</strong> (потому что): Я грустен: со мною друга нет.</li>
+                <li><strong>Пояснение</strong> (а именно): Одно было ясно: обратно пути нет.</li>
+                <li><strong>Дополнение</strong> (и вижу, что / и слышу, что): Он поднял голову: перед ним стояла Настя.</li>
+            </ul>
+            <div class="exception">Исключения – интонационные особенности: при резком противопоставлении может стоять тире, а не двоеточие.</div>
+        </div>
+    </div>
+
+    <!-- ПУНКТУАЦИЯ -->
+    <div id="punctuation" class="topic-content">
+        <div class="cheatsheet-card">
+            <h2>Вся пунктуация для ОГЭ: обособление, вводные слова, обращения</h2>
+            <h3>Обособление определений и приложений</h3>
+            <div class="rule-box">
+                - Причастный оборот после определяемого слова: <span class="example">Сад, окутанный туманом, молчал.</span><br>
+                - Если относится к личному местоимению: <span class="example">Усталые, они вернулись домой.</span><br>
+                - Два и более одиночных определения после существительного: Ветер, холодный и резкий, дул в лицо.
+            </div>
+            <h3>Обособление обстоятельств</h3>
+            <div class="rule-box">
+                - Деепричастные обороты и одиночные деепричастия: <span class="example">Он шёл, напевая.</span><br>
+                <div class="exception">Не обособляются фразеологизмы (спустя рукава, сломя голову) и наречия (стоя, молча).</div>
+                - Обстоятельства, выраженные существительными с предлогами (несмотря на, невзирая на) → всегда обособляются.
+            </div>
+            <h3>Вводные слова и обращения</h3>
+            <div class="rule-box">
+                Вводные слова (конечно, кажется, во-первых, однако) выделяются запятыми. <br>
+                Не являются вводными: вот, будто, как будто, ведь, даже, именно, словно. <br>
+                Обращения всегда выделяются запятыми: <span class="example">Петя, пойдём домой. Ты ли, братец, пришёл?</span>
+            </div>
+            <h3>Сравнительные обороты</h3>
+            <div class="rule-box">Как правило, обособляются с союзами КАК, СЛОВНО, БУДТО, ЧЕМ. Не обособляются если оборот входит в сказуемое (<span class="example">Она сидит как статуя</span>) или имеет значение «в качестве» (<span class="example">Петра знают как хорошего врача</span>).</div>
+        </div>
+    </div>
+
+    <!-- СРЕДСТВА ВЫРАЗИТЕЛЬНОСТИ -->
+    <div id="express" class="topic-content">
+        <div class="cheatsheet-card">
+            <h2>Средства выразительности: тропы + фигуры речи (полный список)</h2>
+            <div class="rule-box">
+                <strong>Эпитет:</strong> образное определение (золотая осень, ветер-гуляка).<br>
+                <strong>Метафора:</strong> скрытое сравнение (горит костёр рябины, зеркало реки).<br>
+                <strong>Олицетворение:</strong> неживое как живое (ветер воет, берёза плакала).<br>
+                <strong>Сравнение:</strong> союзы КАК, БУДТО, ТОЧНО (пыль стоит стеной).<br>
+                <strong>Гипербола:</strong> преувеличение (сто лет не виделись). <strong>Литота:</strong> преуменьшение (мальчик с пальчик).<br>
+                <strong>Ирония:</strong> скрытая насмешка (Откуда, умная, бредёшь ты, голова?).<br>
+                <strong>Перифраз(а):</strong> описательный оборот (Северная Пальмира = Петербург).<br>
+                <strong>Аллегория:</strong> иносказание (басни, образы).
+            </div>
+            <h3>Фигуры речи (синтаксические)</h3>
+            <ul>
+                <li><strong>Анафора:</strong> единоначатие (Люблю тебя, Петра творенье…)</li>
+                <li><strong>Эпифора:</strong> повторение в конце фраз</li>
+                <li><strong>Антитеза:</strong> противопоставление (ученье – свет, а неученье – тьма)</li>
+                <li><strong>Градация:</strong> нарастание или ослабление (не жалко, не зову, не плачу)</li>
+                <li><strong>Риторический вопрос/восклицание/обращение:</strong> не требуют ответа, усиливают эмоции</li>
+                <li><strong>Инверсия:</strong> обратный порядок слов (вышел месяц из тумана)</li>
+                <li><strong>Парцелляция:</strong> намеренный разрыв предложения на части (Я ухожу. Навсегда.)</li>
+            </ul>
+            <div class="important">В заданиях ОГЭ (например, 7 или 11) важно различать метафору и сравнение, эпитет и олицетворение.</div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 Подготовка к ОГЭ по русскому языку | Одобрено экспертом ОГЭ</p>
+</footer>
+
+<script>
+    document.querySelectorAll('.topic-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.topic-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const topicId = btn.getAttribute('data-topic');
+            document.getElementById(topicId).classList.add('active');
         });
-    </script>
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+<div class="header">
+    <div class="logo"><a href="/">ОГЕRUS</a></div>
+    <div class="nav-links">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('tasks.tasks') }}" class="nav-link">Задания</a>
+            <a href="{{ url_for('theory.theory') }}" class="nav-link">Теория</a>
+            <a href="{{ url_for('theory.criteria') }}" class="nav-link">Критерии</a>
+            <a href="{{ url_for('theory.cheatsheet') }}" class="nav-link">Шпаргалка</a>
+            <div class="user-menu">
+                <a href="{{ url_for('profile.profile') }}">
+                    <img src="{{ current_user.avatar or url_for('static', filename='default-avatar.png') }}" 
+                         alt="Avatar" class="header-avatar">
+                </a>
+                <span>{{ current_user.username }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Выйти</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" class="nav-link">Вход</a>
+            <a href="{{ url_for('auth.register') }}" class="nav-link">Регистрация</a>
+        {% endif %}
+    </div>
+</div>
