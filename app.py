@@ -31,6 +31,7 @@ def create_app():
     from blueprints.tasks import tasks_bp
     from blueprints.theory import theory_bp
     from blueprints.api_progress import api_progress_bp
+    from blueprints.punctuation_test import punctuation_test_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -38,6 +39,8 @@ def create_app():
     app.register_blueprint(tasks_bp)
     app.register_blueprint(theory_bp)
     app.register_blueprint(api_progress_bp)
+    app.register_blueprint(punctuation_test_bp)
+
 
     # Создание таблиц
     with app.app_context():
