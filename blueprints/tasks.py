@@ -148,18 +148,15 @@ def submit_task():
     return jsonify({'correct': is_correct, 'correct_answer': correct_answer})
 
 
-# ================= НОВЫЙ КОД ДЛЯ ТЕСТА =================
 
 @tasks_bp.route('/test')
 @login_required
 def start_test():
-    """Инициализация теста: создаёт список вопросов в сессии и переходит к первому"""
     questions = build_test_questions()
     if not questions:
         flash('Нет заданий для теста', 'error')
         return redirect(url_for('tasks.tasks'))
-    
-    # Сохраняем вопросы и пустые ответы в сессии
+
     session['test_questions'] = [{
         'task_type': q['task_type'],
         'task_id': q['task_id'],
@@ -201,16 +198,13 @@ def submit_test_answer():
     if not questions or q_index >= len(questions):
         return jsonify({'error': 'Invalid question index'}), 400
     
-    # Сохраняем ответ
     if 'test_answers' not in session:
         session['test_answers'] = {}
     session['test_answers'][str(q_index)] = answer
     session.modified = True
     
-    # Переходим к следующему вопросу
     next_index = q_index + 1
     if next_index >= len(questions):
-        # Тест закончен
         return jsonify({'finished': True})
     else:
         return jsonify({'finished': False, 'next_index': next_index})
@@ -219,14 +213,12 @@ def submit_test_answer():
 @tasks_bp.route('/test/finish')
 @login_required
 def test_finish():
-    """Показывает результат теста"""
     questions = session.get('test_questions')
     user_answers = session.get('test_answers', {})
     
     if not questions:
         return redirect(url_for('tasks.tasks'))
-    
-    # Подсчёт результатов
+
     correct_count = 0
     results = []
     for i, q in enumerate(questions):
@@ -243,13 +235,11 @@ def test_finish():
             'description': q.get('description', '')
         })
     
-    # Очищаем сессию теста
     session.pop('test_questions', None)
     session.pop('test_answers', None)
     session.pop('test_current', None)
     session.modified = True
     
-    # Сохраняем прогресс для каждого задания (если пользователь авторизован)
     for i, q in enumerate(questions):
         skill = SKILL_MAP.get(q['task_type'], 'Орфография')
         topic_name = q['text'][:80] if q['text'] else q['description']
