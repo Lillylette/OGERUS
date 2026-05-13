@@ -8,7 +8,6 @@ punctuation_test_bp = Blueprint('punctuation_test', __name__)
 @punctuation_test_bp.route('/punctuation-test')
 @login_required
 def test_list():
-    """Список доступных тестов"""
     tests = PUNCTUATION_TEST['tasks']
     return render_template('punctuation_test_list.html', 
                          tests=tests,
@@ -18,7 +17,6 @@ def test_list():
 @punctuation_test_bp.route('/punctuation-test/<int:task_id>')
 @login_required
 def run_test(task_id):
-    """Запуск теста по ID"""
     test = None
     for t in PUNCTUATION_TEST['tasks']:
         if t['id'] == task_id:
@@ -27,8 +25,7 @@ def run_test(task_id):
     
     if not test:
         return redirect('/punctuation-test')
-    
-    # Разбиваем текст на слова для интерактива
+
     words = []
     raw_text = test['text']
     parts = raw_text.split(' ')
@@ -42,7 +39,6 @@ def run_test(task_id):
         })
         current_pos += 1
     
-    # Сохраняем в сессии
     session['current_test'] = {
         'id': test['id'],
         'words': words,
@@ -59,7 +55,6 @@ def run_test(task_id):
 @punctuation_test_bp.route('/api/punctuation/save', methods=['POST'])
 @login_required
 def save_punctuation():
-    """Сохранение расставленных знаков"""
     data = request.get_json()
     word_index = data.get('word_index')
     punctuation = data.get('punctuation')
@@ -79,7 +74,6 @@ def save_punctuation():
 @punctuation_test_bp.route('/api/punctuation/check/<int:task_id>', methods=['POST'])
 @login_required
 def check_punctuation(task_id):
-    """Проверка ответа и возврат разбора"""
     test_data = session.get('current_test')
     if not test_data:
         return jsonify({'error': 'Тест не найден'}), 404
@@ -88,7 +82,6 @@ def check_punctuation(task_id):
     correct = test_data['correct']
     explanation = test_data['explanation']
     
-    # Проверяем каждый знак
     results = []
     errors_count = 0
     
@@ -109,7 +102,6 @@ def check_punctuation(task_id):
             'is_correct': is_correct
         })
     
-    # Очищаем сессию
     session.pop('current_test', None)
     
     return jsonify({
