@@ -38,7 +38,6 @@ def register():
         password = request.form.get('password', '')
         password_confirm = request.form.get('password_confirm', '')
 
-        # Валидация
         if not username or len(username) < 3:
             flash('Имя пользователя должно содержать минимум 3 символа', 'error')
             return render_template('register.html')
@@ -63,7 +62,6 @@ def register():
             flash('Пользователь с таким email уже зарегистрирован', 'error')
             return render_template('register.html')
 
-        # Создание пользователя
         user = User(username=username, email=email)
         user.set_password(password)
         db.session.add(user)

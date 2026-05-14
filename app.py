@@ -10,10 +10,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     app.jinja_env.filters['regex_replace'] = lambda s, find, replace: re.sub(find, replace, s)
-    # Создаём папку для загрузок
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    # Инициализация расширений
     db.init_app(app)
 
     login_manager = LoginManager(app)
@@ -24,7 +22,6 @@ def create_app():
         from models import User
         return db.session.get(User, int(user_id))
 
-    # Регистрация Blueprints
     from blueprints.main import main_bp
     from blueprints.auth import auth_bp
     from blueprints.profile import profile_bp
@@ -42,7 +39,6 @@ def create_app():
     app.register_blueprint(punctuation_test_bp)
 
 
-    # Создание таблиц
     with app.app_context():
         db.create_all()
 
@@ -51,4 +47,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=False)

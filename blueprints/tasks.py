@@ -5,7 +5,6 @@ from data.tasks import TASKS_DATA
 
 tasks_bp = Blueprint('tasks', __name__)
 
-# Сопоставление типа задания
 SKILL_MAP = {
     'task5': 'Пунктуация',
     'task6': 'Орфография',
@@ -16,13 +15,10 @@ SKILL_MAP = {
     'task3': 'Анализ текста',
     'task4': 'Пунктуация'
 }
-
-# ----- Функция для сборки вопросов теста -----
 def build_test_questions():
     """Возвращает список вопросов для теста (по одному из task5, task6, task8, task9)"""
     questions = []
     
-    # Берём task5, задание id=1
     task5 = TASKS_DATA.get('task5', {}).get('tasks', [])
     if task5:
         q = task5[0]  # первое задание
@@ -34,7 +30,6 @@ def build_test_questions():
             'description': q.get('description', '')
         })
     
-    # task6, задание id=1
     task6 = TASKS_DATA.get('task6', {}).get('tasks', [])
     if task6:
         q = task6[0]
@@ -46,7 +41,6 @@ def build_test_questions():
             'description': q.get('description', '')
         })
     
-    # task8, задание id=1
     task8 = TASKS_DATA.get('task8', {}).get('tasks', [])
     if task8:
         q = task8[0]
@@ -58,7 +52,6 @@ def build_test_questions():
             'description': q.get('description', '')
         })
     
-    # task9, задание id=1
     task9 = TASKS_DATA.get('task9', {}).get('tasks', [])
     if task9:
         q = task9[0]
@@ -247,7 +240,7 @@ def test_finish():
         
         progress = UserProgress.query.filter_by(
             user_id=current_user.id,
-            topic_id=q['task_id'] + 1000,  # сдвиг, чтобы не пересекалось с обычными заданиями
+            topic_id=q['task_id'] + 1000,
             skill=skill
         ).first()
         if not progress:
